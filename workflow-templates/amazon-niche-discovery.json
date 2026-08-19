@@ -1,0 +1,51 @@
+{
+  "name": "Discover High-Demand Amazon Niches with Pangolinfo Market Data",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "dc5d9a82-90ce-4984-9ce0-2718aa6e023f",
+      "name": "When clicking Test workflow",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "resource": "market",
+        "operation": "filterNiches",
+        "marketplaceId": "US",
+        "filterJson": "{\n  \"searchVolumeT90Min\": 10000,\n  \"top5BrandsClickShareMax\": 0.4,\n  \"page\": 1,\n  \"size\": 10\n}"
+      },
+      "id": "d69cc958-0ff9-4d2e-8423-034fe43f5e48",
+      "name": "Filter Amazon Niches",
+      "type": "n8n-nodes-pangolinfo.pangolinfo",
+      "typeVersion": 1,
+      "position": [260, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $json.data ?? $json;\nconst items = payload.items?.data ?? payload.items ?? payload.data ?? [];\nreturn (Array.isArray(items) ? items : [items]).map((item) => ({ json: {\n  ...item,\n  marketplaceId: 'US',\n  sourceProduct: 'https://www.pangolinfo.com/amazon-niche-data-api/'\n} }));"
+      },
+      "id": "941ccab5-93d9-40f5-af79-94ca81f05651",
+      "name": "One Item per Niche",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 0]
+    }
+  ],
+  "connections": {
+    "When clicking Test workflow": {
+      "main": [[{ "node": "Filter Amazon Niches", "type": "main", "index": 0 }]]
+    },
+    "Filter Amazon Niches": {
+      "main": [[{ "node": "One Item per Niche", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "versionId": "17f979d8-f52a-451f-882f-129b18273f77",
+  "meta": { "templateCredsSetupCompleted": false },
+  "tags": []
+}
+

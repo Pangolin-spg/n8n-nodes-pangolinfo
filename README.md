@@ -40,11 +40,22 @@ New accounts include free test requests. Calls consume Pangolinfo credits accord
 | Alexa for Shopping prompts and recommendations | [Amazon Alexa API](https://www.pangolinfo.com/amazon-alexa-api/) |
 | Niche research and category filters | [Amazon Niche Data API](https://www.pangolinfo.com/amazon-niche-data-api/) |
 | Agent and MCP workflows | [Amazon Data MCP](https://www.pangolinfo.com/amazon-data-mcp/) |
-| Google AI Overview results | [AI Overview API documentation](https://docs.pangolinfo.com/en-api-reference/aiModeSerpApi/aiModeSerpAPI) |
+| Google AI Overview results | [AI Overview SERP API](https://www.pangolinfo.com/ai-overview-serp-api/) |
 | Google keyword interest data | [Keyword Trends API documentation](https://docs.pangolinfo.com/en-api-reference/trendsApi/keywordTrendsAPI) |
 
 - [Pangolinfo product overview](https://www.pangolinfo.com/)
 - [Complete API documentation](https://docs.pangolinfo.com/en-index)
+
+## Ready-to-import workflow templates
+
+The repository includes four sanitized n8n workflows. They contain no API keys and prompt for a Pangolinfo credential after import:
+
+- [Amazon product and review research](workflow-templates/amazon-product-review-research.json)
+- [Google AI Overview monitor](workflow-templates/ai-overview-monitor.json)
+- [Amazon niche opportunity discovery](workflow-templates/amazon-niche-discovery.json)
+- [Amazon Alexa recommendation monitor](workflow-templates/amazon-alexa-recommendations.json)
+
+See [workflow-templates/README.md](workflow-templates/README.md) for setup, product links, and submission-ready descriptions.
 
 ## License
 

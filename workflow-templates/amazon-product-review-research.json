@@ -1,0 +1,76 @@
+{
+  "name": "Research Amazon Products and Reviews by ASIN with Pangolinfo",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "93d75219-2b3e-4f3c-a958-e9f5b75c9e01",
+      "name": "When clicking Test workflow",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 160]
+    },
+    {
+      "parameters": {
+        "resource": "amazon",
+        "operation": "amazonProduct",
+        "asin": "B0DYTF8L2W",
+        "site": "amz_us",
+        "zipcode": "10041"
+      },
+      "id": "8f745130-196d-412c-87e1-d13516cce30c",
+      "name": "Get Amazon Product",
+      "type": "n8n-nodes-pangolinfo.pangolinfo",
+      "typeVersion": 1,
+      "position": [260, 60]
+    },
+    {
+      "parameters": {
+        "resource": "amazon",
+        "operation": "amazonReviews",
+        "asin": "B0DYTF8L2W",
+        "site": "amz_us",
+        "pageCount": 1,
+        "starFilter": "all_stars",
+        "reviewSort": "recent"
+      },
+      "id": "fca29b6b-1d1f-4303-9953-b21d1e8b8722",
+      "name": "Get Amazon Reviews",
+      "type": "n8n-nodes-pangolinfo.pangolinfo",
+      "typeVersion": 1,
+      "position": [260, 260]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "fe7c9b71-8c82-480f-a032-16316dc1ed44",
+      "name": "Combine Product and Reviews",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [540, 160]
+    }
+  ],
+  "connections": {
+    "When clicking Test workflow": {
+      "main": [[
+        { "node": "Get Amazon Product", "type": "main", "index": 0 },
+        { "node": "Get Amazon Reviews", "type": "main", "index": 0 }
+      ]]
+    },
+    "Get Amazon Product": {
+      "main": [[{ "node": "Combine Product and Reviews", "type": "main", "index": 0 }]]
+    },
+    "Get Amazon Reviews": {
+      "main": [[{ "node": "Combine Product and Reviews", "type": "main", "index": 1 }]]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "versionId": "7cb64511-9c19-489f-9bf8-08bc2ebc96a7",
+  "meta": { "templateCredsSetupCompleted": false },
+  "tags": []
+}
+

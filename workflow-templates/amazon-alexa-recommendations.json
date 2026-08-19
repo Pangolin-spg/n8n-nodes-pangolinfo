@@ -1,0 +1,51 @@
+{
+  "name": "Track Amazon Alexa for Shopping Recommendations with Pangolinfo",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "b8218fb6-32ed-462a-88f7-3e2c0fe81942",
+      "name": "When clicking Test workflow",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "resource": "ai",
+        "operation": "alexa",
+        "prompts": "Recommend a quiet portable fan under $30",
+        "contextUrl": "https://www.amazon.com/",
+        "screenshot": false
+      },
+      "id": "946b2a02-1fc6-4599-8a74-2485b9ea54d6",
+      "name": "Ask Alexa for Shopping",
+      "type": "n8n-nodes-pangolinfo.pangolinfo",
+      "typeVersion": 1,
+      "position": [260, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $json.data ?? $json;\nconst turns = payload.json ?? [];\nreturn (Array.isArray(turns) ? turns : [turns]).map((turn) => ({ json: {\n  prompt: turn.prompt ?? null,\n  answer: turn.content ?? null,\n  products: turn.products ?? [],\n  followUpQuestions: turn.follow_up_questions ?? [],\n  screenshot: turn.screenshot ?? payload.screenshot ?? null,\n  sourceProduct: 'https://www.pangolinfo.com/amazon-alexa-api/'\n} }));"
+      },
+      "id": "1c3dbcbf-9162-4e08-8e37-7061ed6f5ce6",
+      "name": "Normalize Alexa Recommendations",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 0]
+    }
+  ],
+  "connections": {
+    "When clicking Test workflow": {
+      "main": [[{ "node": "Ask Alexa for Shopping", "type": "main", "index": 0 }]]
+    },
+    "Ask Alexa for Shopping": {
+      "main": [[{ "node": "Normalize Alexa Recommendations", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "versionId": "6ae8d825-a734-441c-ad06-2cd7b2bedbe0",
+  "meta": { "templateCredsSetupCompleted": false },
+  "tags": []
+}

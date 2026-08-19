@@ -147,7 +147,7 @@ export class Pangolinfo implements INodeType {
       {
         displayName: 'Prompt(s)', name: 'prompts', type: 'string', typeOptions: { rows: 4 },
         required: true, default: '',
-        description: 'One prompt per line; maximum five is recommended',
+        description: 'One prompt per line; Amazon Alexa for Shopping supports up to five prompts per request',
         displayOptions: { show: { operation: ['alexa'] } },
       },
       {
@@ -161,6 +161,7 @@ export class Pangolinfo implements INodeType {
       {
         displayName: 'Google Search URL', name: 'googleUrl', type: 'string', required: true,
         default: 'https://www.google.com/search?q=',
+        description: 'Google results URL to process with the Pangolinfo AI Overview SERP API',
         displayOptions: { show: { operation: ['aiOverview'] } },
       },
       {
@@ -234,10 +235,15 @@ export class Pangolinfo implements INodeType {
             if (operation === 'sellerProducts') body.pageCount = this.getNodeParameter('pageCount', i) as number;
           }
         } else if (operation === 'alexa') {
+          const prompts = (this.getNodeParameter('prompts', i) as string)
+            .split('\n').map((value) => value.trim()).filter(Boolean);
+          if (prompts.length === 0 || prompts.length > 5) {
+            throw new NodeOperationError(this.getNode(), 'Provide between one and five Alexa prompts');
+          }
           url = 'https://scrapeapi.pangolinfo.com/api/v2/scrape';
           body = {
             parserName: 'amazonAlexa',
-            param: (this.getNodeParameter('prompts', i) as string).split('\n').map((v) => v.trim()).filter(Boolean),
+            param: prompts,
             url: this.getNodeParameter('contextUrl', i) as string,
             screenshot: this.getNodeParameter('screenshot', i) as boolean,
           };
@@ -246,9 +252,14 @@ export class Pangolinfo implements INodeType {
           body = { parserName: 'googleSearch', url: this.getNodeParameter('googleUrl', i) as string,
             screenshot: this.getNodeParameter('screenshot', i) as boolean };
         } else if (operation === 'keywordTrends') {
+          const keywords = (this.getNodeParameter('trendKeywords', i) as string)
+            .split(',').map((value) => value.trim()).filter(Boolean);
+          if (keywords.length === 0 || keywords.length > 5) {
+            throw new NodeOperationError(this.getNode(), 'Provide between one and five trend keywords');
+          }
           url = 'https://scrapeapi.pangolinfo.com/api/v2/google/trends';
           body = {
-            keywords: (this.getNodeParameter('trendKeywords', i) as string).split(',').map((v) => v.trim()).filter(Boolean),
+            keywords,
             timeRange: this.getNodeParameter('timeRange', i) as string,
             region: this.getNodeParameter('region', i) as string,
           };

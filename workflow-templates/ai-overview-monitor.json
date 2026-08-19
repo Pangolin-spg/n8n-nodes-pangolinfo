@@ -1,0 +1,53 @@
+{
+  "name": "Monitor Google AI Overviews and Citations with Pangolinfo",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "hours", "hoursInterval": 24 }] }
+      },
+      "id": "bd52dfbc-a822-4925-8f66-d08161745441",
+      "name": "Every 24 Hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "resource": "ai",
+        "operation": "aiOverview",
+        "googleUrl": "https://www.google.com/search?q=best+portable+fan",
+        "screenshot": true
+      },
+      "id": "467568a2-f582-44ba-b876-59352a1feb22",
+      "name": "Get Google AI Overview",
+      "type": "n8n-nodes-pangolinfo.pangolinfo",
+      "typeVersion": 1,
+      "position": [260, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $json.data ?? $json;\nreturn [{ json: {\n  checkedAt: new Date().toISOString(),\n  taskId: payload.taskId ?? payload.task_id ?? null,\n  aiOverview: payload.ai_overview ?? payload.json ?? null,\n  organicResults: payload.organic_results ?? null,\n  screenshot: payload.screenshot ?? null,\n  sourceProduct: 'https://www.pangolinfo.com/ai-overview-serp-api/'\n} }];"
+      },
+      "id": "f2d98508-1cdf-4da6-a864-40931d6d8a2c",
+      "name": "Normalize AI Visibility Record",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 0]
+    }
+  ],
+  "connections": {
+    "Every 24 Hours": {
+      "main": [[{ "node": "Get Google AI Overview", "type": "main", "index": 0 }]]
+    },
+    "Get Google AI Overview": {
+      "main": [[{ "node": "Normalize AI Visibility Record", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "versionId": "d2972522-e94e-42d6-a70d-f0af3b6d6e20",
+  "meta": { "templateCredsSetupCompleted": false },
+  "tags": []
+}
+
