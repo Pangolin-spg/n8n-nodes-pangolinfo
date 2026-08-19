@@ -14,7 +14,7 @@
     "pangolinfo"
   ],
   "license": "MIT",
-  "homepage": "https://www.pangolinfo.com/",
+  "homepage": "https://www.pangolinfo.com/amazon-scraper-api/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Pangolin-spg/n8n-nodes-pangolinfo.git"

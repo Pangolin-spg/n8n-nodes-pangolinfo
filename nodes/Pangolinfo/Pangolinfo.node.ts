@@ -28,6 +28,7 @@ export class Pangolinfo implements INodeType {
     version: 1,
     subtitle: '={{$parameter["operation"]}}',
     description: 'Get real-time Amazon, Alexa, AI SERP, niche, and category data',
+    documentationUrl: 'https://www.pangolinfo.com/amazon-scraper-api/',
     defaults: { name: 'Pangolinfo' },
     inputs: ['main'],
     outputs: ['main'],

@@ -34,11 +34,17 @@ New accounts include free test requests. Calls consume Pangolinfo credits accord
 
 ## Useful links
 
+| Capability | Pangolinfo product |
+| --- | --- |
+| Amazon product details, search, reviews, sellers, Best Sellers, and New Releases | [Amazon Scraper API](https://www.pangolinfo.com/amazon-scraper-api/) |
+| Alexa for Shopping prompts and recommendations | [Amazon Alexa API](https://www.pangolinfo.com/amazon-alexa-api/) |
+| Niche research and category filters | [Amazon Niche Data API](https://www.pangolinfo.com/amazon-niche-data-api/) |
+| Agent and MCP workflows | [Amazon Data MCP](https://www.pangolinfo.com/amazon-data-mcp/) |
+| Google AI Overview results | [AI Overview API documentation](https://docs.pangolinfo.com/en-api-reference/aiModeSerpApi/aiModeSerpAPI) |
+| Google keyword interest data | [Keyword Trends API documentation](https://docs.pangolinfo.com/en-api-reference/trendsApi/keywordTrendsAPI) |
+
 - [Pangolinfo product overview](https://www.pangolinfo.com/)
-- [API documentation](https://docs.pangolinfo.com/en-index)
-- [Amazon Data MCP](https://www.pangolinfo.com/amazon-data-mcp/)
-- [Amazon Niche Data API](https://www.pangolinfo.com/amazon-niche-data-api/)
-- [Amazon Alexa API](https://www.pangolinfo.com/amazon-alexa-api/)
+- [Complete API documentation](https://docs.pangolinfo.com/en-index)
 
 ## License
 
