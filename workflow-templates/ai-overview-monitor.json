@@ -3,6 +3,32 @@
   "nodes": [
     {
       "parameters": {
+        "content": "## Monitor Google AI Overviews and citations\n\nThis workflow checks a Google search query every 24 hours through Pangolinfo, retrieves the current AI Overview, cited sources, organic results, and an optional screenshot, then normalizes the response into a consistent visibility record. It is designed for SEO, GEO, content, and brand teams tracking how brands, products, and domains appear in generative search results.\n\n### How it works\n1. **Every 24 Hours** starts the monitoring run.\n2. **Configure Monitoring** keeps the Google search URL and screenshot preference in one place.\n3. **Get Google AI Overview** requests structured AI Overview and SERP data from Pangolinfo.\n4. **Normalize AI Visibility Record** prepares the result for storage, comparison, alerts, dashboards, or AI analysis.\n\n### Setup\nThis template uses a community node and is compatible with **self-hosted n8n only**. Install `n8n-nodes-pangolinfo`, create a Pangolinfo API credential, select it on the orange node, and update **Configure Monitoring**.\n\nLearn about the [Pangolinfo AI Overview SERP API](https://www.pangolinfo.com/ai-overview-serp-api/), explore the [AI SERP Skill](https://www.pangolinfo.com/ai-serp-skill/), and read the [API documentation](https://docs.pangolinfo.com/en-api-reference/aiModeSerpApi/aiModeSerpAPI).",
+        "height": 460,
+        "width": 1260,
+        "color": 4
+      },
+      "id": "95da0178-e8b0-4d49-a34b-bc2c69a3f921",
+      "name": "About this workflow",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-420, -520]
+    },
+    {
+      "parameters": {
+        "content": "## Configure once, then monitor\n\nEdit the Google search URL and screenshot preference in **Configure Monitoring**. Select your Pangolinfo credential on **Get Google AI Overview**, then test the workflow before activating its 24-hour schedule.\n\nSend the normalized record to Sheets, a database, Slack, email, a dashboard, or an AI comparison step to track citation and visibility changes over time.",
+        "height": 240,
+        "width": 980,
+        "color": 7
+      },
+      "id": "0e591890-dc65-46bc-8abd-3c5f23de534a",
+      "name": "Setup instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-40, 380]
+    },
+    {
+      "parameters": {
         "rule": { "interval": [{ "field": "hours", "hoursInterval": 24 }] }
       },
       "id": "bd52dfbc-a822-4925-8f66-d08161745441",
@@ -13,16 +39,42 @@
     },
     {
       "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "781e698a-454b-442b-a060-52232ea68cff",
+              "name": "googleUrl",
+              "value": "https://www.google.com/search?q=best+portable+fan",
+              "type": "string"
+            },
+            {
+              "id": "941635d8-488b-4745-91a0-85f7394d338c",
+              "name": "screenshot",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5ccbbd44-41ca-4af7-825d-42fe992635e5",
+      "name": "Configure Monitoring",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [240, 0]
+    },
+    {
+      "parameters": {
         "resource": "ai",
         "operation": "aiOverview",
-        "googleUrl": "https://www.google.com/search?q=best+portable+fan",
-        "screenshot": true
+        "googleUrl": "={{ $json.googleUrl }}",
+        "screenshot": "={{ $json.screenshot }}"
       },
       "id": "467568a2-f582-44ba-b876-59352a1feb22",
       "name": "Get Google AI Overview",
       "type": "n8n-nodes-pangolinfo.pangolinfo",
       "typeVersion": 1,
-      "position": [260, 0]
+      "position": [500, 0]
     },
     {
       "parameters": {
@@ -32,11 +84,14 @@
       "name": "Normalize AI Visibility Record",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [520, 0]
+      "position": [760, 0]
     }
   ],
   "connections": {
     "Every 24 Hours": {
+      "main": [[{ "node": "Configure Monitoring", "type": "main", "index": 0 }]]
+    },
+    "Configure Monitoring": {
       "main": [[{ "node": "Get Google AI Overview", "type": "main", "index": 0 }]]
     },
     "Get Google AI Overview": {
@@ -50,4 +105,3 @@
   "meta": { "templateCredsSetupCompleted": false },
   "tags": []
 }
-
