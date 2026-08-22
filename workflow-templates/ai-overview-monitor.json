@@ -16,8 +16,8 @@
     },
     {
       "parameters": {
-        "content": "## Configure once, then monitor\n\nEdit the Google search URL and screenshot preference in **Configure Monitoring**. Select your Pangolinfo credential on **Get Google AI Overview**, then test the workflow before activating its 24-hour schedule.\n\nSend the normalized record to Sheets, a database, Slack, email, a dashboard, or an AI comparison step to track citation and visibility changes over time.",
-        "height": 240,
+        "content": "## Before activating the schedule\n\n1. Open **Configure Monitoring** and replace the example Google search URL with the query you want to track.\n2. Choose whether Pangolinfo should also return a SERP screenshot.\n3. Select your Pangolinfo credential on **Get Google AI Overview**.\n4. Test the workflow once and inspect **Normalize AI Visibility Record** before activating it.\n\nThe normalized output includes the check time, task ID, AI Overview data, organic results, screenshot, and canonical Pangolinfo product URL. Connect it to Sheets, a database, Slack, email, a dashboard, or an AI comparison step to measure citation and brand-visibility changes over time.",
+        "height": 300,
         "width": 980,
         "color": 7
       },
