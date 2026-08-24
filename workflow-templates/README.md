@@ -16,14 +16,14 @@ Suggested n8n title: **Research Amazon Products and Reviews by ASIN with Pangoli
 
 ### Google AI Overview Monitor
 
-Run a scheduled Google query, retrieve AI Overview content, cited sources, organic results, and an optional screenshot for GEO and brand-visibility monitoring.
+Audit multiple Google queries on a schedule, score AI Overview brand and citation visibility, aggregate a ranked portfolio report, and send an SMTP alert only when configured thresholds fail.
 
 - Product: https://www.pangolinfo.com/ai-overview-serp-api/
 - Agent Skill: https://www.pangolinfo.com/ai-serp-skill/
-- Documentation: https://docs.pangolinfo.com/en-api-reference/aiModeSerpApi/aiModeSerpAPI
+- Documentation: https://docs.pangolinfo.com/en-api-reference/aiModeSerpApi/serpSubmit
 - File: `ai-overview-monitor.json`
 
-Suggested n8n title: **Monitor Google AI Overviews and Citations with Pangolinfo**
+Suggested n8n title: **Monitor Google AI Overviews and Alert on Citation Gaps with Pangolinfo**
 
 ### Amazon Niche Opportunity Discovery
 
@@ -51,4 +51,3 @@ Suggested n8n title: **Track Amazon Alexa for Shopping Recommendations with Pang
 - Do not add real credentials, tokens, customer ASINs, or private queries to exported JSON.
 - Use the relevant product landing page as the primary external link and the endpoint documentation as the technical link.
 - Keep the template useful without adding unrelated nodes solely to increase keyword coverage.
-
