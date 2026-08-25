@@ -35,6 +35,15 @@ for (const file of files) {
   if (file === 'ai-overview-monitor.json' && stickyCount < 4) {
     throw new Error(`${file}: the advanced monitoring workflow requires four section notes.`);
   }
+  if (source.includes('Email Monitoring Alert')) {
+    const executionNodeCount = nodes.length - stickyCount;
+    if (stickyCount < 4 || executionNodeCount < 10) {
+      throw new Error(`${file}: growth workflows require four notes and ten execution nodes.`);
+    }
+    if (!source.includes('pangolinfo.com/') || !source.includes('docs.pangolinfo.com/')) {
+      throw new Error(`${file}: missing product or API documentation link.`);
+    }
+  }
 
   for (const [sourceNode, outputs] of Object.entries(workflow.connections ?? {})) {
     if (!names.has(sourceNode)) {

@@ -45,6 +45,24 @@ Ask Alexa for Shopping a product-discovery prompt and normalize recommended prod
 
 Suggested n8n title: **Track Amazon Alexa for Shopping Recommendations with Pangolinfo**
 
+## Advanced monitoring portfolio
+
+The following nine workflows share a production-oriented structure: manual and scheduled triggers, centralized configuration, bounded job creation, a Pangolinfo data step, normalized metrics, threshold evaluation, a Markdown portfolio report, and conditional email alerting. Each contains four explanatory Sticky Notes and ten execution nodes.
+
+| Workflow | Primary outcome | Product |
+|---|---|---|
+| `amazon-keyword-ad-rank-monitor.json` | Track organic and Sponsored positions for target ASINs across keywords | Amazon Scraper API |
+| `amazon-competitor-price-stock-monitor.json` | Monitor competitor price, availability, rating, coupon, and seller signals | Amazon Scraper API |
+| `amazon-review-complaint-monitor.json` | Measure low-star share and recurring complaint phrases across ASINs | Amazon Scraper API / Reviews |
+| `google-keyword-breakout-monitor.json` | Detect keyword momentum and breakout related searches | Keyword Trends API |
+| `amazon-niche-opportunity-scorecard.json` | Rank product-selection niches with a transparent opportunity score | Amazon Niche Data API |
+| `amazon-seller-catalog-monitor.json` | Summarize competitor seller assortment, pricing, discounts, and availability | Amazon Scraper API |
+| `amazon-alexa-share-of-voice-monitor.json` | Measure brand and ASIN recommendation coverage across Alexa prompts | Amazon Alexa API |
+| `amazon-best-seller-rank-monitor.json` | Track Best Sellers brand share and owned-ASIN rank | Amazon Scraper API |
+| `amazon-new-release-launch-radar.json` | Score high-traction new product launches by category | Amazon Scraper API |
+
+Each JSON has a matching `-submission.md` file containing n8n Creator Portal copy, setup instructions, requirements, and canonical product/docs links.
+
 ## Submission notes
 
 - Community nodes are supported by self-hosted n8n. State this clearly in every template submission.

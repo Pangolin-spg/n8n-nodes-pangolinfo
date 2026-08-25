@@ -1,0 +1,412 @@
+{
+  "name": "Score Amazon Niche Opportunities with Pangolinfo Market Data",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Amazon niche opportunity scorecard\n\nFilter Amazon niches by demand and concentration, normalize the returned market metrics, calculate a transparent opportunity score, rank candidates, and alert when strong product-selection opportunities appear.\n\n### Business outcome\n- Apply demand and brand-concentration filters\n- Score and rank niche opportunities transparently\n- Expose the metrics behind every recommendation\n- Produce a short product-research shortlist\n\nThis template requires self-hosted n8n with the `n8n-nodes-pangolinfo` community node enabled.\n\n[Product page](https://www.pangolinfo.com/amazon-niche-data-api/) · [API documentation](https://docs.pangolinfo.com/en-api-reference/nicheFilterAPI/nicheFilterAPI)",
+        "height": 500,
+        "width": 1180,
+        "color": 4
+      },
+      "id": "533ab13d-84e9-4325-ab07-7ebda1fee39d",
+      "name": "Workflow overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        -620
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 1. Configure the monitor\n\nEdit only **Monitoring Configuration**. Replace all sample identifiers, thresholds, marketplace settings, and email addresses. Select a Pangolinfo credential on the orange node.\n\nUse **Test Workflow Manually** first. Activate the daily schedule only after the output matches your monitoring goal.",
+        "height": 330,
+        "width": 720,
+        "color": 7
+      },
+      "id": "589605f3-275a-4b5a-a639-ad6b010f2045",
+      "name": "Configuration guide",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Collect and analyze\n\n**Prepare Monitoring Jobs** validates the input and creates bounded API jobs. **Filter Amazon Niches** retrieves current structured data. **Analyze Current Data** normalizes response variations, calculates the use-case metrics, and records human-readable alert reasons.",
+        "height": 330,
+        "width": 880,
+        "color": 5
+      },
+      "id": "ff27fd1a-adcb-459c-aa03-47387591772b",
+      "name": "Analysis guide",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        520,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Aggregate and alert\n\n**Build Monitoring Report** produces one Markdown portfolio report. Only failed thresholds reach **Email Monitoring Alert**; healthy executions still return a structured summary.\n\nConnect SMTP or replace the final alert node with Slack, Teams, Jira, a database, or a data warehouse.",
+        "height": 330,
+        "width": 850,
+        "color": 6
+      },
+      "id": "ab7b470e-4d97-4469-a81f-94b48269d9b7",
+      "name": "Reporting guide",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1500,
+        300
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "b4035f48-6a36-4203-a82a-b4240cafaf7f",
+      "name": "Test Workflow Manually",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -360,
+        -40
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "ede18ced-fbc1-4a58-ad3c-022892aba585",
+      "name": "Every Day at 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -360,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e994e511-403d-462a-adb0-77d55b4bdf71",
+              "name": "marketplaceId",
+              "value": "US",
+              "type": "string"
+            },
+            {
+              "id": "7855bb08-56ea-45ba-a347-77105c1cf016",
+              "name": "minimumSearchVolume",
+              "value": 10000,
+              "type": "number"
+            },
+            {
+              "id": "3a252099-5881-4e90-a0d9-77d86d275132",
+              "name": "maximumTop5BrandShare",
+              "value": 0.4,
+              "type": "number"
+            },
+            {
+              "id": "0a93f0bf-a73e-4401-aa74-c4a984974436",
+              "name": "resultSize",
+              "value": 20,
+              "type": "number"
+            },
+            {
+              "id": "83280bca-c993-4dbb-abef-e77b82ea6094",
+              "name": "minimumOpportunityScore",
+              "value": 65,
+              "type": "number"
+            },
+            {
+              "id": "02503965-aac4-49f6-aec7-40af7a3ba0d1",
+              "name": "alertFromEmail",
+              "value": "Pangolinfo Monitor <alerts@example.com>",
+              "type": "string"
+            },
+            {
+              "id": "26a4c3c8-70d8-40e3-a5cd-7c29d800f6e7",
+              "name": "alertToEmail",
+              "value": "ecommerce-team@example.com",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "31a260f3-47d4-4815-a408-99c0fec59891",
+      "name": "Monitoring Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -80,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $json; if (Number(config.resultSize) < 1 || Number(config.resultSize) > 50) throw new Error('resultSize must be between 1 and 50.'); return [{ json: { ...config, monitorKey: config.marketplaceId } }];"
+      },
+      "id": "eddafa57-fc68-41a9-a51d-86b1530ee765",
+      "name": "Prepare Monitoring Jobs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "market",
+        "operation": "filterNiches",
+        "marketplaceId": "={{ $json.marketplaceId }}",
+        "filterJson": "={{ JSON.stringify({ searchVolumeT90Min: $json.minimumSearchVolume, top5BrandsClickShareMax: $json.maximumTop5BrandShare, page: 1, size: $json.resultSize }) }}"
+      },
+      "id": "7580dfbf-0068-47ab-a6c8-75c1ed538ada",
+      "name": "Filter Amazon Niches",
+      "type": "n8n-nodes-pangolinfo.pangolinfo",
+      "typeVersion": 1,
+      "position": [
+        500,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const job = $('Prepare Monitoring Jobs').item.json; const payload = $json.data ?? $json; const raw = payload.items?.data ?? payload.items ?? payload.data?.items ?? payload.data ?? payload.json ?? payload; const items = Array.isArray(raw) ? raw : [];\nconst scored = items.map((n) => { const volume = Number(n.searchVolumeT90 ?? n.searchVolume ?? 0); const concentration = Number(n.top5BrandsClickShare ?? n.top5BrandShare ?? 1); const growth = Number(n.searchVolumeT90Yoy ?? n.growth ?? 0); const demandScore = Math.min(45, Math.log10(Math.max(volume, 1)) * 10); const competitionScore = Math.max(0, 35 * (1 - concentration)); const growthScore = Math.max(0, Math.min(20, growth / 5)); const score = Math.round(demandScore + competitionScore + growthScore); return { ...n, opportunityScore: score, demandScore: Math.round(demandScore), competitionScore: Math.round(competitionScore), growthScore: Math.round(growthScore) }; }).sort((a, b) => b.opportunityScore - a.opportunityScore);\nconst strong = scored.filter((n) => n.opportunityScore >= Number(job.minimumOpportunityScore)); const alertReasons = strong.length ? [strong.length + ' niches exceed opportunity score ' + job.minimumOpportunityScore] : [];\nreturn { json: { ...job, candidateCount: scored.length, strongOpportunityCount: strong.length, topOpportunities: scored.slice(0, 10), alertRequired: alertReasons.length > 0, alertReasons, metricSummary: 'candidates=' + scored.length + ', strong=' + strong.length + ', best=' + (scored[0]?.opportunityScore ?? 'n/a'), reportTitle: 'Amazon niche opportunity scorecard', productUrl: 'https://www.pangolinfo.com/amazon-niche-data-api/' } };"
+      },
+      "id": "6d9a777f-8add-4678-aa3d-9e6fe225fea5",
+      "name": "Analyze Current Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        780,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all().map((item) => item.json);\nif (rows.length === 0) throw new Error('No monitoring results were returned.');\nconst issues = rows.filter((row) => row.alertRequired || (row.alertReasons ?? []).length > 0);\nconst lines = rows.map((row) => '| ' + String(row.monitorKey ?? row.asin ?? row.keyword ?? row.sellerId ?? 'item') + ' | ' + String(row.metricSummary ?? '') + ' | ' + ((row.alertReasons ?? []).join('; ') || 'Healthy') + ' |');\nconst reportMarkdown = [\n  '# ' + String(rows[0].reportTitle ?? 'Pangolinfo monitoring report'),\n  '',\n  'Checked: ' + new Date().toISOString(),\n  'Items checked: ' + rows.length,\n  'Items requiring attention: ' + issues.length,\n  '',\n  '| Item | Current metrics | Status |',\n  '| --- | --- | --- |',\n  ...lines,\n  '',\n  'Product: ' + String(rows[0].productUrl ?? 'https://www.pangolinfo.com/')\n].join('\\n');\nreturn [{ json: {\n  checkedAt: new Date().toISOString(), alertRequired: issues.length > 0,\n  itemCount: rows.length, issueCount: issues.length, issues, rows, reportMarkdown,\n  alertFromEmail: rows[0].alertFromEmail, alertToEmail: rows[0].alertToEmail\n} }];"
+      },
+      "id": "59a9c1a7-b574-466d-a685-cefd4e95123d",
+      "name": "Build Monitoring Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1060,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ac9a877c-8593-47b0-a7c2-b02d6e74e807",
+              "leftValue": "={{ $json.alertRequired }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "492c1a53-1e40-4edf-a2d8-8a83a05b8d36",
+      "name": "Attention Required?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1340,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $json.alertFromEmail }}",
+        "toEmail": "={{ $json.alertToEmail }}",
+        "subject": "=[Niche Opportunity] {{ $json.issueCount }} monitored items need attention",
+        "emailFormat": "text",
+        "text": "={{ $json.reportMarkdown }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "69eadd53-b052-42c4-a0f1-c3e041a2376d",
+      "name": "Email Monitoring Alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1640,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0c9fd561-8172-41ae-a47a-41ab686933e5",
+              "name": "status",
+              "value": "healthy",
+              "type": "string"
+            },
+            {
+              "id": "fcafeae4-e411-4b35-adb7-887b90e8dc49",
+              "name": "message",
+              "value": "=All {{ $json.itemCount }} monitored items passed the configured thresholds.",
+              "type": "string"
+            },
+            {
+              "id": "4330742a-d3e2-4d69-aa35-e7c5cb700f00",
+              "name": "reportMarkdown",
+              "value": "={{ $json.reportMarkdown }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "93951ced-8ca5-424a-a9b3-86d413164c1c",
+      "name": "Healthy Run Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1640,
+        120
+      ]
+    }
+  ],
+  "connections": {
+    "Test Workflow Manually": {
+      "main": [
+        [
+          {
+            "node": "Monitoring Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every Day at 08:00": {
+      "main": [
+        [
+          {
+            "node": "Monitoring Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Monitoring Configuration": {
+      "main": [
+        [
+          {
+            "node": "Prepare Monitoring Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Monitoring Jobs": {
+      "main": [
+        [
+          {
+            "node": "Filter Amazon Niches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Amazon Niches": {
+      "main": [
+        [
+          {
+            "node": "Analyze Current Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Current Data": {
+      "main": [
+        [
+          {
+            "node": "Build Monitoring Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Monitoring Report": {
+      "main": [
+        [
+          {
+            "node": "Attention Required?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attention Required?": {
+      "main": [
+        [
+          {
+            "node": "Email Monitoring Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Healthy Run Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "956db8f6-6afd-43a8-a5ae-92dd79a5d90a",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

@@ -1,0 +1,407 @@
+{
+  "name": "Detect Google Keyword Trend Breakouts with Pangolinfo and n8n",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Google keyword trend and breakout monitor\n\nTrack up to five product keywords in Google Trends, calculate recent momentum from the returned timeline, surface breakout related searches, and alert when demand shifts materially.\n\n### Business outcome\n- Compare up to five keywords in one request\n- Calculate recent versus previous-period momentum\n- Extract breakout and rising related queries\n- Create an evidence-based product-demand alert\n\nThis template requires self-hosted n8n with the `n8n-nodes-pangolinfo` community node enabled.\n\n[Product page](https://www.pangolinfo.com/ai-overview-serp-api/) · [API documentation](https://docs.pangolinfo.com/en-api-reference/trendsApi/keywordTrendsAPI)",
+        "height": 500,
+        "width": 1180,
+        "color": 4
+      },
+      "id": "e1f3b745-7d19-4fef-a444-0d243949242f",
+      "name": "Workflow overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        -620
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 1. Configure the monitor\n\nEdit only **Monitoring Configuration**. Replace all sample identifiers, thresholds, marketplace settings, and email addresses. Select a Pangolinfo credential on the orange node.\n\nUse **Test Workflow Manually** first. Activate the daily schedule only after the output matches your monitoring goal.",
+        "height": 330,
+        "width": 720,
+        "color": 7
+      },
+      "id": "08433806-62dd-4463-a506-be7f5471a895",
+      "name": "Configuration guide",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Collect and analyze\n\n**Prepare Monitoring Jobs** validates the input and creates bounded API jobs. **Get Google Keyword Trends** retrieves current structured data. **Analyze Current Data** normalizes response variations, calculates the use-case metrics, and records human-readable alert reasons.",
+        "height": 330,
+        "width": 880,
+        "color": 5
+      },
+      "id": "113fa57c-31bd-404c-a498-ac0aff10b760",
+      "name": "Analysis guide",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        520,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Aggregate and alert\n\n**Build Monitoring Report** produces one Markdown portfolio report. Only failed thresholds reach **Email Monitoring Alert**; healthy executions still return a structured summary.\n\nConnect SMTP or replace the final alert node with Slack, Teams, Jira, a database, or a data warehouse.",
+        "height": 330,
+        "width": 850,
+        "color": 6
+      },
+      "id": "4d22364f-8633-4db6-a947-a6514db55cfe",
+      "name": "Reporting guide",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1500,
+        300
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "6792fbf2-12c4-4c94-adb5-d44f9b5c3c84",
+      "name": "Test Workflow Manually",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -360,
+        -40
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "d0be579a-1fcb-4c1b-a8a6-be614791e553",
+      "name": "Every Day at 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -360,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1071f3e0-4a68-42bb-a6f0-edbbefccad1a",
+              "name": "keywords",
+              "value": "portable fan,neck fan,desk fan",
+              "type": "string"
+            },
+            {
+              "id": "076f65d9-b55c-4cc4-a436-4890942af635",
+              "name": "region",
+              "value": "US",
+              "type": "string"
+            },
+            {
+              "id": "cecbf110-3431-4a0e-a51a-6152c2af7444",
+              "name": "timeRange",
+              "value": "today 12-m",
+              "type": "string"
+            },
+            {
+              "id": "4017f259-6440-4038-a510-46860dfe9768",
+              "name": "minimumMomentumPercent",
+              "value": 20,
+              "type": "number"
+            },
+            {
+              "id": "df7defe5-68cc-4929-a19e-4364dcfeb7ad",
+              "name": "alertFromEmail",
+              "value": "Pangolinfo Monitor <alerts@example.com>",
+              "type": "string"
+            },
+            {
+              "id": "d7f2375a-de5b-4ab0-a907-a37c63264572",
+              "name": "alertToEmail",
+              "value": "ecommerce-team@example.com",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "265e7b3b-cfb3-4fac-a3de-5d12124eab9f",
+      "name": "Monitoring Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -80,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $json; const keywords = String(config.keywords ?? '').split(',').map((v) => v.trim()).filter(Boolean);\nif (!keywords.length || keywords.length > 5) throw new Error('Provide between one and five comma-separated keywords.');\nreturn [{ json: { ...config, keywords, monitorKey: keywords.join(', ') } }];"
+      },
+      "id": "2ae5402c-fbe2-403e-ac3c-6e20452bb390",
+      "name": "Prepare Monitoring Jobs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "ai",
+        "operation": "keywordTrends",
+        "trendKeywords": "={{ $json.keywords.join(\",\") }}",
+        "region": "={{ $json.region }}",
+        "timeRange": "={{ $json.timeRange }}"
+      },
+      "id": "40854a8e-b9a6-4126-a2dd-6e5a26e1859f",
+      "name": "Get Google Keyword Trends",
+      "type": "n8n-nodes-pangolinfo.pangolinfo",
+      "typeVersion": 1,
+      "position": [
+        500,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const job = $('Prepare Monitoring Jobs').item.json; const payload = $json.data ?? $json; const data = payload.json ?? payload.data?.json ?? payload;\nconst timeline = Array.isArray(data.timelineData) ? data.timelineData : []; const width = job.keywords.length;\nconst points = timeline.map((p) => Array.isArray(p.value) ? p.value.map(Number) : []).filter((v) => v.length >= width);\nconst recent = points.slice(-4); const previous = points.slice(-8, -4); const avg = (rows, i) => rows.length ? rows.reduce((s, r) => s + (Number(r[i]) || 0), 0) / rows.length : 0;\nconst momentum = job.keywords.map((keyword, i) => { const current = avg(recent, i); const prior = avg(previous, i); const percent = prior > 0 ? ((current - prior) / prior) * 100 : (current > 0 ? 100 : 0); return { keyword, current: Math.round(current), previous: Math.round(prior), momentumPercent: Math.round(percent) }; });\nconst ranks = Array.isArray(data.keywordsRankData) ? data.keywordsRankData : []; const breakoutQueries = ranks.flatMap((row) => (row.rankList ?? []).flatMap((group) => group.rankedKeyword ?? []).filter((q) => /breakout/i.test(String(q.formattedValue ?? ''))).map((q) => ({ keyword: row.keyword, query: q.query, value: q.formattedValue })));\nconst rising = momentum.filter((m) => Math.abs(m.momentumPercent) >= Number(job.minimumMomentumPercent)); const alertReasons = rising.map((m) => m.keyword + ' momentum ' + m.momentumPercent + '%'); if (breakoutQueries.length) alertReasons.push(breakoutQueries.length + ' breakout related queries detected');\nreturn { json: { ...job, momentum, breakoutQueries, alertRequired: alertReasons.length > 0, alertReasons, metricSummary: momentum.map((m) => m.keyword + '=' + m.momentumPercent + '%').join(', '), reportTitle: 'Google keyword trend report', productUrl: 'https://www.pangolinfo.com/ai-overview-serp-api/' } };"
+      },
+      "id": "fe0d9a6d-dc0f-4e47-a773-1aa7c5f33c28",
+      "name": "Analyze Current Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        780,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all().map((item) => item.json);\nif (rows.length === 0) throw new Error('No monitoring results were returned.');\nconst issues = rows.filter((row) => row.alertRequired || (row.alertReasons ?? []).length > 0);\nconst lines = rows.map((row) => '| ' + String(row.monitorKey ?? row.asin ?? row.keyword ?? row.sellerId ?? 'item') + ' | ' + String(row.metricSummary ?? '') + ' | ' + ((row.alertReasons ?? []).join('; ') || 'Healthy') + ' |');\nconst reportMarkdown = [\n  '# ' + String(rows[0].reportTitle ?? 'Pangolinfo monitoring report'),\n  '',\n  'Checked: ' + new Date().toISOString(),\n  'Items checked: ' + rows.length,\n  'Items requiring attention: ' + issues.length,\n  '',\n  '| Item | Current metrics | Status |',\n  '| --- | --- | --- |',\n  ...lines,\n  '',\n  'Product: ' + String(rows[0].productUrl ?? 'https://www.pangolinfo.com/')\n].join('\\n');\nreturn [{ json: {\n  checkedAt: new Date().toISOString(), alertRequired: issues.length > 0,\n  itemCount: rows.length, issueCount: issues.length, issues, rows, reportMarkdown,\n  alertFromEmail: rows[0].alertFromEmail, alertToEmail: rows[0].alertToEmail\n} }];"
+      },
+      "id": "b3d02995-73b3-40c6-a9bf-88ffcab80a17",
+      "name": "Build Monitoring Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1060,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3e48f1bb-8065-4c10-a534-603f1f62d8fe",
+              "leftValue": "={{ $json.alertRequired }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "96ecec97-6438-4926-ab75-09cd20eedaa7",
+      "name": "Attention Required?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1340,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $json.alertFromEmail }}",
+        "toEmail": "={{ $json.alertToEmail }}",
+        "subject": "=[Keyword Trend] {{ $json.issueCount }} monitored items need attention",
+        "emailFormat": "text",
+        "text": "={{ $json.reportMarkdown }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "35d762e6-d218-4d4c-a868-6ce812b1ada7",
+      "name": "Email Monitoring Alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1640,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "169a55fb-7e1b-4e3b-a7d7-e884ba136524",
+              "name": "status",
+              "value": "healthy",
+              "type": "string"
+            },
+            {
+              "id": "ace95ec4-3895-46ca-ab60-476d512a328d",
+              "name": "message",
+              "value": "=All {{ $json.itemCount }} monitored items passed the configured thresholds.",
+              "type": "string"
+            },
+            {
+              "id": "97d103e4-66d2-4ffb-a8f8-70b63c08f3ec",
+              "name": "reportMarkdown",
+              "value": "={{ $json.reportMarkdown }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "027d5a9a-fc20-43ed-a1b9-7e779b1067ff",
+      "name": "Healthy Run Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1640,
+        120
+      ]
+    }
+  ],
+  "connections": {
+    "Test Workflow Manually": {
+      "main": [
+        [
+          {
+            "node": "Monitoring Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every Day at 08:00": {
+      "main": [
+        [
+          {
+            "node": "Monitoring Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Monitoring Configuration": {
+      "main": [
+        [
+          {
+            "node": "Prepare Monitoring Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Monitoring Jobs": {
+      "main": [
+        [
+          {
+            "node": "Get Google Keyword Trends",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Google Keyword Trends": {
+      "main": [
+        [
+          {
+            "node": "Analyze Current Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Current Data": {
+      "main": [
+        [
+          {
+            "node": "Build Monitoring Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Monitoring Report": {
+      "main": [
+        [
+          {
+            "node": "Attention Required?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attention Required?": {
+      "main": [
+        [
+          {
+            "node": "Email Monitoring Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Healthy Run Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f4f0ca83-c0b6-4bbe-ab6b-ac99c880401b",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

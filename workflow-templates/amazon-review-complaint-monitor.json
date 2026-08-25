@@ -1,0 +1,415 @@
+{
+  "name": "Monitor Amazon Review Complaints and Rating Risk with Pangolinfo",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Amazon review complaint and rating-risk monitor\n\nCollect recent reviews for several ASINs, calculate the low-star share, detect configurable complaint phrases, summarize recurring topics, and alert product or customer-experience teams.\n\n### Business outcome\n- Monitor several owned or competitor ASINs\n- Calculate negative-review share from recent feedback\n- Detect recurring complaint themes without an external AI model\n- Route only threshold breaches to an alert\n\nThis template requires self-hosted n8n with the `n8n-nodes-pangolinfo` community node enabled.\n\n[Product page](https://www.pangolinfo.com/amazon-scraper-api/) · [API documentation](https://docs.pangolinfo.com/en-api-reference/amazonReviewAPI/amazonReviewAPI)",
+        "height": 500,
+        "width": 1180,
+        "color": 4
+      },
+      "id": "bb8b74fb-301a-4c2d-aeda-1ba918ffed82",
+      "name": "Workflow overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        -620
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 1. Configure the monitor\n\nEdit only **Monitoring Configuration**. Replace all sample identifiers, thresholds, marketplace settings, and email addresses. Select a Pangolinfo credential on the orange node.\n\nUse **Test Workflow Manually** first. Activate the daily schedule only after the output matches your monitoring goal.",
+        "height": 330,
+        "width": 720,
+        "color": 7
+      },
+      "id": "a7012224-cf78-4fe6-a283-61bc2bb6d178",
+      "name": "Configuration guide",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Collect and analyze\n\n**Prepare Monitoring Jobs** validates the input and creates bounded API jobs. **Get Recent Amazon Reviews** retrieves current structured data. **Analyze Current Data** normalizes response variations, calculates the use-case metrics, and records human-readable alert reasons.",
+        "height": 330,
+        "width": 880,
+        "color": 5
+      },
+      "id": "eaee6276-d9b1-4ec0-aa99-92fcf5fa4d2b",
+      "name": "Analysis guide",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        520,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Aggregate and alert\n\n**Build Monitoring Report** produces one Markdown portfolio report. Only failed thresholds reach **Email Monitoring Alert**; healthy executions still return a structured summary.\n\nConnect SMTP or replace the final alert node with Slack, Teams, Jira, a database, or a data warehouse.",
+        "height": 330,
+        "width": 850,
+        "color": 6
+      },
+      "id": "b96d7f3d-d80a-474c-aacb-fbc0be25bbe2",
+      "name": "Reporting guide",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1500,
+        300
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "787f3678-248a-498a-a219-024901150085",
+      "name": "Test Workflow Manually",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -360,
+        -40
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "3b352cb6-24f3-413a-ab86-444441af6e74",
+      "name": "Every Day at 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -360,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ea90465f-d5f6-4401-ae48-e0a2c1a833cb",
+              "name": "asins",
+              "value": "B0DYTF8L2W\nB0CAMPLE01",
+              "type": "string"
+            },
+            {
+              "id": "c5aa35ae-2690-463c-a1df-26601a13697f",
+              "name": "site",
+              "value": "amz_us",
+              "type": "string"
+            },
+            {
+              "id": "ba8744ab-694a-4f97-a135-0c513d4bf7b8",
+              "name": "pageCount",
+              "value": 1,
+              "type": "number"
+            },
+            {
+              "id": "e68eb2ef-1685-4e0e-a74f-798f625a699f",
+              "name": "complaintPhrases",
+              "value": "broke,poor quality,too small,missing,late,refund,not working",
+              "type": "string"
+            },
+            {
+              "id": "77d82818-8536-4e1f-ac54-7d1a5a7d03ed",
+              "name": "maximumNegativeShare",
+              "value": 0.25,
+              "type": "number"
+            },
+            {
+              "id": "7ad084bc-8057-4fd0-a74e-e0d4104d9b03",
+              "name": "alertFromEmail",
+              "value": "Pangolinfo Monitor <alerts@example.com>",
+              "type": "string"
+            },
+            {
+              "id": "a2b075eb-22d4-4dbc-a834-a253dfc4fe66",
+              "name": "alertToEmail",
+              "value": "ecommerce-team@example.com",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "62b3ff84-dbd2-4f2e-ac53-df4540577228",
+      "name": "Monitoring Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -80,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $json;\nconst asins = String(config.asins ?? '').split(/\\r?\\n|,/).map((v) => v.trim().toUpperCase()).filter(Boolean);\nif (!asins.length) throw new Error('Add at least one ASIN.');\nif (asins.length > 15) throw new Error('Use at most 15 ASINs per run.');\nconst complaintPhrases = String(config.complaintPhrases ?? '').split(',').map((v) => v.trim().toLowerCase()).filter(Boolean);\nreturn asins.map((asin) => ({ json: { ...config, asin, complaintPhrases, monitorKey: asin } }));"
+      },
+      "id": "013bf6ac-cb45-4700-a7dc-acf4a0088c79",
+      "name": "Prepare Monitoring Jobs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "amazon",
+        "operation": "amazonReviews",
+        "asin": "={{ $json.asin }}",
+        "site": "={{ $json.site }}",
+        "pageCount": "={{ $json.pageCount }}",
+        "starFilter": "all_stars",
+        "reviewSort": "recent"
+      },
+      "id": "eef86f80-e1f9-4039-ab9d-53a44d55823f",
+      "name": "Get Recent Amazon Reviews",
+      "type": "n8n-nodes-pangolinfo.pangolinfo",
+      "typeVersion": 1,
+      "position": [
+        500,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const job = $('Prepare Monitoring Jobs').item.json; const payload = $json.data ?? $json; const raw = payload.json ?? payload.data?.json ?? payload;\nconst reviews = [raw, raw?.items, raw?.reviews, raw?.data].find(Array.isArray) ?? [];\nconst normalized = reviews.map((r) => { const rating = Number(String(r.rating ?? r.star ?? r.score ?? '').match(/\\d+(?:\\.\\d+)?/)?.[0] ?? NaN); const text = String(r.content ?? r.body ?? r.text ?? r.title ?? '').toLowerCase(); return { rating: Number.isFinite(rating) ? rating : null, text, title: r.title ?? null, date: r.date ?? r.reviewDate ?? null }; });\nconst rated = normalized.filter((r) => r.rating !== null); const negative = rated.filter((r) => r.rating <= 2); const negativeShare = rated.length ? negative.length / rated.length : 0;\nconst topicCounts = Object.fromEntries(job.complaintPhrases.map((phrase) => [phrase, normalized.filter((r) => r.text.includes(phrase)).length]).filter(([, count]) => count > 0));\nconst alertReasons = []; if (!reviews.length) alertReasons.push('No reviews returned'); if (negativeShare > Number(job.maximumNegativeShare)) alertReasons.push('Negative review share is ' + Math.round(negativeShare * 100) + '%'); if (Object.keys(topicCounts).length) alertReasons.push('Complaint phrases detected: ' + Object.keys(topicCounts).join(', '));\nreturn { json: { ...job, reviewCount: reviews.length, ratedReviewCount: rated.length, negativeReviewCount: negative.length, negativeShare, topicCounts, sampleNegativeReviews: negative.slice(0, 5), alertRequired: alertReasons.length > 0, alertReasons, metricSummary: 'reviews=' + reviews.length + ', negative=' + Math.round(negativeShare * 100) + '%, topics=' + Object.keys(topicCounts).length, reportTitle: 'Amazon review risk report', productUrl: 'https://www.pangolinfo.com/amazon-scraper-api/' } };"
+      },
+      "id": "9c5c557f-d1eb-4c88-af57-008759f450a8",
+      "name": "Analyze Current Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        780,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all().map((item) => item.json);\nif (rows.length === 0) throw new Error('No monitoring results were returned.');\nconst issues = rows.filter((row) => row.alertRequired || (row.alertReasons ?? []).length > 0);\nconst lines = rows.map((row) => '| ' + String(row.monitorKey ?? row.asin ?? row.keyword ?? row.sellerId ?? 'item') + ' | ' + String(row.metricSummary ?? '') + ' | ' + ((row.alertReasons ?? []).join('; ') || 'Healthy') + ' |');\nconst reportMarkdown = [\n  '# ' + String(rows[0].reportTitle ?? 'Pangolinfo monitoring report'),\n  '',\n  'Checked: ' + new Date().toISOString(),\n  'Items checked: ' + rows.length,\n  'Items requiring attention: ' + issues.length,\n  '',\n  '| Item | Current metrics | Status |',\n  '| --- | --- | --- |',\n  ...lines,\n  '',\n  'Product: ' + String(rows[0].productUrl ?? 'https://www.pangolinfo.com/')\n].join('\\n');\nreturn [{ json: {\n  checkedAt: new Date().toISOString(), alertRequired: issues.length > 0,\n  itemCount: rows.length, issueCount: issues.length, issues, rows, reportMarkdown,\n  alertFromEmail: rows[0].alertFromEmail, alertToEmail: rows[0].alertToEmail\n} }];"
+      },
+      "id": "3c014709-1319-4b76-a630-56364e24c11f",
+      "name": "Build Monitoring Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1060,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d741319e-24cd-46e7-ab62-a422c1b690b9",
+              "leftValue": "={{ $json.alertRequired }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "3288b22d-57f3-45da-a214-6371523ac2dd",
+      "name": "Attention Required?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1340,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $json.alertFromEmail }}",
+        "toEmail": "={{ $json.alertToEmail }}",
+        "subject": "=[Review Risk] {{ $json.issueCount }} monitored items need attention",
+        "emailFormat": "text",
+        "text": "={{ $json.reportMarkdown }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "bfaff492-97d0-451a-af66-f8a40a74e1f0",
+      "name": "Email Monitoring Alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1640,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "465a1821-51b9-4b6f-a54e-edcba2c44e10",
+              "name": "status",
+              "value": "healthy",
+              "type": "string"
+            },
+            {
+              "id": "7cbbf6ca-14b6-4bd1-a892-acc73db4e018",
+              "name": "message",
+              "value": "=All {{ $json.itemCount }} monitored items passed the configured thresholds.",
+              "type": "string"
+            },
+            {
+              "id": "eb3719ef-0121-4922-aace-179704051fa1",
+              "name": "reportMarkdown",
+              "value": "={{ $json.reportMarkdown }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c2760ce9-6c1b-4774-a982-0ea107c0a38a",
+      "name": "Healthy Run Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1640,
+        120
+      ]
+    }
+  ],
+  "connections": {
+    "Test Workflow Manually": {
+      "main": [
+        [
+          {
+            "node": "Monitoring Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every Day at 08:00": {
+      "main": [
+        [
+          {
+            "node": "Monitoring Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Monitoring Configuration": {
+      "main": [
+        [
+          {
+            "node": "Prepare Monitoring Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Monitoring Jobs": {
+      "main": [
+        [
+          {
+            "node": "Get Recent Amazon Reviews",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent Amazon Reviews": {
+      "main": [
+        [
+          {
+            "node": "Analyze Current Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Current Data": {
+      "main": [
+        [
+          {
+            "node": "Build Monitoring Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Monitoring Report": {
+      "main": [
+        [
+          {
+            "node": "Attention Required?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attention Required?": {
+      "main": [
+        [
+          {
+            "node": "Email Monitoring Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Healthy Run Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c54d542e-c00e-4b76-a8f0-b3af4ac83ab2",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

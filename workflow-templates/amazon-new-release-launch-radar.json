@@ -1,0 +1,413 @@
+{
+  "name": "Build an Amazon New Release Product Launch Radar with Pangolinfo",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Amazon New Releases product-launch radar\n\nScan several Amazon New Releases categories, normalize newly visible products, score launch traction from rank, rating, reviews, price, and discount signals, and produce a shortlist for competitive or product research.\n\n### Business outcome\n- Scan multiple New Releases categories\n- Normalize launch rank, rating, reviews, price, and discount signals\n- Calculate a transparent launch-traction score\n- Alert when high-traction new competitors appear\n\nThis template requires self-hosted n8n with the `n8n-nodes-pangolinfo` community node enabled.\n\n[Product page](https://www.pangolinfo.com/amazon-scraper-api/) · [API documentation](https://docs.pangolinfo.com/en-api-reference/amazonApi/amazonScrapeAPI)",
+        "height": 500,
+        "width": 1180,
+        "color": 4
+      },
+      "id": "b1254cbe-700a-4516-ac95-8ab49767b03c",
+      "name": "Workflow overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        -620
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 1. Configure the monitor\n\nEdit only **Monitoring Configuration**. Replace all sample identifiers, thresholds, marketplace settings, and email addresses. Select a Pangolinfo credential on the orange node.\n\nUse **Test Workflow Manually** first. Activate the daily schedule only after the output matches your monitoring goal.",
+        "height": 330,
+        "width": 720,
+        "color": 7
+      },
+      "id": "291cf82e-344f-43b6-ab6c-0f1a81f047c5",
+      "name": "Configuration guide",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Collect and analyze\n\n**Prepare Monitoring Jobs** validates the input and creates bounded API jobs. **Get Amazon New Releases** retrieves current structured data. **Analyze Current Data** normalizes response variations, calculates the use-case metrics, and records human-readable alert reasons.",
+        "height": 330,
+        "width": 880,
+        "color": 5
+      },
+      "id": "a0fd9a26-1e9f-4cd0-a1c8-d95757e334e7",
+      "name": "Analysis guide",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        520,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Aggregate and alert\n\n**Build Monitoring Report** produces one Markdown portfolio report. Only failed thresholds reach **Email Monitoring Alert**; healthy executions still return a structured summary.\n\nConnect SMTP or replace the final alert node with Slack, Teams, Jira, a database, or a data warehouse.",
+        "height": 330,
+        "width": 850,
+        "color": 6
+      },
+      "id": "7765d64c-9794-48b9-a763-c4b6b82f6742",
+      "name": "Reporting guide",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1500,
+        300
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "a6771406-535f-4a66-a6d5-6d2b2d4124a5",
+      "name": "Test Workflow Manually",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -360,
+        -40
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "e9109aa9-600c-411d-a0be-50d29bb84c54",
+      "name": "Every Day at 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -360,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "82e73170-33a2-436e-ad1f-1ec49c9a69f7",
+              "name": "categoryKeywords",
+              "value": "portable fans\ndesk fans\nwearable fans",
+              "type": "string"
+            },
+            {
+              "id": "2f10a2d5-9733-4ffe-ae24-6939c21b97fa",
+              "name": "site",
+              "value": "amz_us",
+              "type": "string"
+            },
+            {
+              "id": "c8182c6f-f036-4e6f-a19f-73a1e62b7df5",
+              "name": "zipcode",
+              "value": "10041",
+              "type": "string"
+            },
+            {
+              "id": "52ef9cdc-6be8-47b8-a0dd-d51c4a0dffdb",
+              "name": "minimumLaunchScore",
+              "value": 60,
+              "type": "number"
+            },
+            {
+              "id": "8ff38d55-ce96-4757-a18c-a901f0c611d2",
+              "name": "maximumProductsPerCategory",
+              "value": 30,
+              "type": "number"
+            },
+            {
+              "id": "d8ed67bd-c8dc-4aa5-ad2f-f8993204e8f4",
+              "name": "alertFromEmail",
+              "value": "Pangolinfo Monitor <alerts@example.com>",
+              "type": "string"
+            },
+            {
+              "id": "258a7996-bf7c-4222-a1ae-3bda5c88697a",
+              "name": "alertToEmail",
+              "value": "ecommerce-team@example.com",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ce8d9008-4e6b-4679-ac36-3510b788dc34",
+      "name": "Monitoring Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -80,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $json; const categoryKeywords = String(config.categoryKeywords ?? '').split(/\\r?\\n/).map((v) => v.trim()).filter(Boolean); if (!categoryKeywords.length) throw new Error('Add at least one New Releases category keyword.'); if (categoryKeywords.length > 15) throw new Error('Use at most 15 categories per run.'); return categoryKeywords.map((keyword) => ({ json: { ...config, keyword, monitorKey: keyword } }));"
+      },
+      "id": "91e9def6-c37e-454c-a908-f018592cb3af",
+      "name": "Prepare Monitoring Jobs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "amazon",
+        "operation": "newReleases",
+        "keyword": "={{ $json.keyword }}",
+        "site": "={{ $json.site }}",
+        "zipcode": "={{ $json.zipcode }}"
+      },
+      "id": "73c0fefc-d16e-45b3-ac43-6b216f47b9ea",
+      "name": "Get Amazon New Releases",
+      "type": "n8n-nodes-pangolinfo.pangolinfo",
+      "typeVersion": 1,
+      "position": [
+        500,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const job = $('Prepare Monitoring Jobs').item.json; const payload = $json.data ?? $json; const raw = payload.json ?? payload.data?.json ?? payload; const products = ([raw, raw?.items, raw?.products, raw?.results].find(Array.isArray) ?? []).slice(0, Number(job.maximumProductsPerCategory)); const num = (value) => Number(String(value ?? '').replace(/,/g, '').match(/\\d+(?:\\.\\d+)?/)?.[0] ?? 0); const scored = products.map((p, i) => { const rank = num(p.rank ?? p.position ?? i + 1) || i + 1; const rating = num(p.rating ?? p.star); const reviews = num(p.ratingsCount ?? p.reviewCount); const hasDiscount = Boolean(p.coupon || p.discount || p.savingsPercentage); const rankScore = Math.max(0, 45 - Math.min(45, rank - 1)); const ratingScore = Math.min(25, rating * 5); const reviewScore = Math.min(20, Math.log10(Math.max(reviews, 1)) * 8); const discountScore = hasDiscount ? 10 : 0; return { asin: p.asin ?? p.productId ?? null, title: p.title ?? p.name ?? null, rank, rating, reviews, price: p.price ?? null, hasDiscount, launchScore: Math.round(rankScore + ratingScore + reviewScore + discountScore) }; }).sort((a, b) => b.launchScore - a.launchScore); const strong = scored.filter((p) => p.launchScore >= Number(job.minimumLaunchScore)); const alertReasons = strong.length ? [strong.length + ' high-traction new releases detected'] : []; return { json: { ...job, productCount: scored.length, strongLaunchCount: strong.length, topLaunches: scored.slice(0, 10), strongLaunches: strong.slice(0, 10), alertRequired: alertReasons.length > 0, alertReasons, metricSummary: 'products=' + scored.length + ', strong launches=' + strong.length + ', best score=' + (scored[0]?.launchScore ?? 'n/a'), reportTitle: 'Amazon New Releases launch radar', productUrl: 'https://www.pangolinfo.com/amazon-scraper-api/' } };"
+      },
+      "id": "0abaaddb-efda-4774-a6e9-afaeaf2b22f9",
+      "name": "Analyze Current Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        780,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all().map((item) => item.json);\nif (rows.length === 0) throw new Error('No monitoring results were returned.');\nconst issues = rows.filter((row) => row.alertRequired || (row.alertReasons ?? []).length > 0);\nconst lines = rows.map((row) => '| ' + String(row.monitorKey ?? row.asin ?? row.keyword ?? row.sellerId ?? 'item') + ' | ' + String(row.metricSummary ?? '') + ' | ' + ((row.alertReasons ?? []).join('; ') || 'Healthy') + ' |');\nconst reportMarkdown = [\n  '# ' + String(rows[0].reportTitle ?? 'Pangolinfo monitoring report'),\n  '',\n  'Checked: ' + new Date().toISOString(),\n  'Items checked: ' + rows.length,\n  'Items requiring attention: ' + issues.length,\n  '',\n  '| Item | Current metrics | Status |',\n  '| --- | --- | --- |',\n  ...lines,\n  '',\n  'Product: ' + String(rows[0].productUrl ?? 'https://www.pangolinfo.com/')\n].join('\\n');\nreturn [{ json: {\n  checkedAt: new Date().toISOString(), alertRequired: issues.length > 0,\n  itemCount: rows.length, issueCount: issues.length, issues, rows, reportMarkdown,\n  alertFromEmail: rows[0].alertFromEmail, alertToEmail: rows[0].alertToEmail\n} }];"
+      },
+      "id": "92dd9e4b-0fad-4e3e-a510-0e31ffe4084c",
+      "name": "Build Monitoring Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1060,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "41d83621-f408-405f-a2e3-c5604d669d53",
+              "leftValue": "={{ $json.alertRequired }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "93fe265e-06a3-47f3-ad8c-15c861e9386f",
+      "name": "Attention Required?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1340,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $json.alertFromEmail }}",
+        "toEmail": "={{ $json.alertToEmail }}",
+        "subject": "=[New Release Radar] {{ $json.issueCount }} monitored items need attention",
+        "emailFormat": "text",
+        "text": "={{ $json.reportMarkdown }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "10e1c263-82e9-4487-a55a-f6c16ed170f6",
+      "name": "Email Monitoring Alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1640,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "10569389-c301-4525-a61f-6f92f5435034",
+              "name": "status",
+              "value": "healthy",
+              "type": "string"
+            },
+            {
+              "id": "d7412353-1902-4348-a89c-eda7f6459288",
+              "name": "message",
+              "value": "=All {{ $json.itemCount }} monitored items passed the configured thresholds.",
+              "type": "string"
+            },
+            {
+              "id": "e106147f-ecf1-409e-ac77-9f7ee645168f",
+              "name": "reportMarkdown",
+              "value": "={{ $json.reportMarkdown }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9b312835-721a-43cc-a423-9c6bb3720728",
+      "name": "Healthy Run Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1640,
+        120
+      ]
+    }
+  ],
+  "connections": {
+    "Test Workflow Manually": {
+      "main": [
+        [
+          {
+            "node": "Monitoring Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every Day at 08:00": {
+      "main": [
+        [
+          {
+            "node": "Monitoring Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Monitoring Configuration": {
+      "main": [
+        [
+          {
+            "node": "Prepare Monitoring Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Monitoring Jobs": {
+      "main": [
+        [
+          {
+            "node": "Get Amazon New Releases",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Amazon New Releases": {
+      "main": [
+        [
+          {
+            "node": "Analyze Current Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Current Data": {
+      "main": [
+        [
+          {
+            "node": "Build Monitoring Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Monitoring Report": {
+      "main": [
+        [
+          {
+            "node": "Attention Required?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attention Required?": {
+      "main": [
+        [
+          {
+            "node": "Email Monitoring Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Healthy Run Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9747d5be-1284-4418-ac7a-073c9c7f2e7d",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

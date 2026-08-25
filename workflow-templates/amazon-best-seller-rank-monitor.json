@@ -1,0 +1,425 @@
+{
+  "name": "Monitor Amazon Best Seller Rankings and Brand Share with Pangolinfo",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Amazon Best Sellers rank and brand-share monitor\n\nRetrieve current Amazon Best Sellers for several category keywords, measure target-brand and target-ASIN presence, record the best observed rank, and alert when category visibility drops.\n\n### Business outcome\n- Monitor several Best Sellers categories in one run\n- Measure target-brand share of the returned shelf\n- Track the best rank for owned ASINs\n- Detect missing products and category visibility loss\n\nThis template requires self-hosted n8n with the `n8n-nodes-pangolinfo` community node enabled.\n\n[Product page](https://www.pangolinfo.com/amazon-scraper-api/) · [API documentation](https://docs.pangolinfo.com/en-api-reference/amazonApi/amazonScrapeAPI)",
+        "height": 500,
+        "width": 1180,
+        "color": 4
+      },
+      "id": "846e4298-2667-4362-a852-6a465de86447",
+      "name": "Workflow overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        -620
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 1. Configure the monitor\n\nEdit only **Monitoring Configuration**. Replace all sample identifiers, thresholds, marketplace settings, and email addresses. Select a Pangolinfo credential on the orange node.\n\nUse **Test Workflow Manually** first. Activate the daily schedule only after the output matches your monitoring goal.",
+        "height": 330,
+        "width": 720,
+        "color": 7
+      },
+      "id": "907a184c-0f5a-4926-a55f-38f0750ae7e6",
+      "name": "Configuration guide",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Collect and analyze\n\n**Prepare Monitoring Jobs** validates the input and creates bounded API jobs. **Get Amazon Best Sellers** retrieves current structured data. **Analyze Current Data** normalizes response variations, calculates the use-case metrics, and records human-readable alert reasons.",
+        "height": 330,
+        "width": 880,
+        "color": 5
+      },
+      "id": "7f22864d-828a-4d0b-a358-aeff9024d20b",
+      "name": "Analysis guide",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        520,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Aggregate and alert\n\n**Build Monitoring Report** produces one Markdown portfolio report. Only failed thresholds reach **Email Monitoring Alert**; healthy executions still return a structured summary.\n\nConnect SMTP or replace the final alert node with Slack, Teams, Jira, a database, or a data warehouse.",
+        "height": 330,
+        "width": 850,
+        "color": 6
+      },
+      "id": "e46dbe03-0c48-4aa5-a9a0-40212ebbd43d",
+      "name": "Reporting guide",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1500,
+        300
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "b50f3c29-e1c0-4164-ae3d-b224fb78a75f",
+      "name": "Test Workflow Manually",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -360,
+        -40
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "31d28f51-ac43-4ab9-a37c-90229a65b956",
+      "name": "Every Day at 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -360,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e46020d1-1095-4cec-a34f-a11d6eb05c8a",
+              "name": "categoryKeywords",
+              "value": "portable fans\ndesk fans\nwearable fans",
+              "type": "string"
+            },
+            {
+              "id": "6e5c12f1-1cdc-43d9-a04a-2801fcc7eb5f",
+              "name": "trackedBrand",
+              "value": "Example Brand",
+              "type": "string"
+            },
+            {
+              "id": "b31183a3-1a75-4cf4-a9f2-f31ce88bbfb4",
+              "name": "trackedAsins",
+              "value": "B0DYTF8L2W",
+              "type": "string"
+            },
+            {
+              "id": "d9c23f73-b688-4ec4-a34b-376393a47b68",
+              "name": "site",
+              "value": "amz_us",
+              "type": "string"
+            },
+            {
+              "id": "129a29d1-0712-42e5-af65-9e5eb19497a6",
+              "name": "zipcode",
+              "value": "10041",
+              "type": "string"
+            },
+            {
+              "id": "655bb258-6b6c-4a7a-ad14-6a76ca8bf2c5",
+              "name": "minimumBrandShare",
+              "value": 0.05,
+              "type": "number"
+            },
+            {
+              "id": "1fd6b1e4-ad27-4879-aa7e-9498876856bc",
+              "name": "maximumBestRank",
+              "value": 50,
+              "type": "number"
+            },
+            {
+              "id": "199b8659-7a26-48c5-af66-4b14b86c4990",
+              "name": "alertFromEmail",
+              "value": "Pangolinfo Monitor <alerts@example.com>",
+              "type": "string"
+            },
+            {
+              "id": "bb40f138-54cb-4160-a643-44c98d94fc9f",
+              "name": "alertToEmail",
+              "value": "ecommerce-team@example.com",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d3cc4704-0ac2-45fb-a49b-851673ae0752",
+      "name": "Monitoring Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -80,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $json; const categoryKeywords = String(config.categoryKeywords ?? '').split(/\\r?\\n/).map((v) => v.trim()).filter(Boolean); if (!categoryKeywords.length) throw new Error('Add at least one Best Sellers category keyword.'); if (categoryKeywords.length > 15) throw new Error('Use at most 15 categories per run.'); const trackedAsins = String(config.trackedAsins ?? '').split(/[\\s,]+/).map((v) => v.trim().toUpperCase()).filter(Boolean); return categoryKeywords.map((keyword) => ({ json: { ...config, keyword, trackedAsins, monitorKey: keyword } }));"
+      },
+      "id": "6f2402a5-0a57-45fe-a0da-961cc2373e36",
+      "name": "Prepare Monitoring Jobs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "amazon",
+        "operation": "bestSellers",
+        "keyword": "={{ $json.keyword }}",
+        "site": "={{ $json.site }}",
+        "zipcode": "={{ $json.zipcode }}"
+      },
+      "id": "dad4acb3-5437-4441-a409-a0fdae4f6da6",
+      "name": "Get Amazon Best Sellers",
+      "type": "n8n-nodes-pangolinfo.pangolinfo",
+      "typeVersion": 1,
+      "position": [
+        500,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const job = $('Prepare Monitoring Jobs').item.json; const payload = $json.data ?? $json; const raw = payload.json ?? payload.data?.json ?? payload; const products = [raw, raw?.items, raw?.products, raw?.results].find(Array.isArray) ?? []; const brand = String(job.trackedBrand ?? '').toLowerCase(); const normalized = products.map((p, i) => ({ asin: String(p.asin ?? p.productId ?? '').toUpperCase(), title: p.title ?? p.name ?? null, brand: p.brand ?? null, rank: Number(p.rank ?? p.position ?? i + 1), price: p.price ?? null, rating: p.rating ?? p.star ?? null })); const brandMatches = normalized.filter((p) => String(p.brand ?? p.title ?? '').toLowerCase().includes(brand)); const asinMatches = normalized.filter((p) => job.trackedAsins.includes(p.asin)); const brandShare = normalized.length ? brandMatches.length / normalized.length : 0; const bestTrackedRank = asinMatches.length ? Math.min(...asinMatches.map((p) => p.rank)) : null; const alertReasons = []; if (!normalized.length) alertReasons.push('No Best Sellers returned'); if (brandShare < Number(job.minimumBrandShare)) alertReasons.push('Brand share below threshold: ' + Math.round(brandShare * 100) + '%'); if (job.trackedAsins.length && bestTrackedRank === null) alertReasons.push('Tracked ASINs missing from Best Sellers'); else if (bestTrackedRank > Number(job.maximumBestRank)) alertReasons.push('Best tracked rank below target: ' + bestTrackedRank); return { json: { ...job, productCount: normalized.length, brandMatchCount: brandMatches.length, brandShare, bestTrackedRank, matchedProducts: [...brandMatches, ...asinMatches].slice(0, 10), topProducts: normalized.slice(0, 10), alertRequired: alertReasons.length > 0, alertReasons, metricSummary: 'brand share=' + Math.round(brandShare * 100) + '%, best rank=' + (bestTrackedRank ?? 'not found'), reportTitle: 'Amazon Best Sellers visibility report', productUrl: 'https://www.pangolinfo.com/amazon-scraper-api/' } };"
+      },
+      "id": "7731a1eb-4cfd-4d8e-a7a8-df5c99ede4b8",
+      "name": "Analyze Current Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        780,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all().map((item) => item.json);\nif (rows.length === 0) throw new Error('No monitoring results were returned.');\nconst issues = rows.filter((row) => row.alertRequired || (row.alertReasons ?? []).length > 0);\nconst lines = rows.map((row) => '| ' + String(row.monitorKey ?? row.asin ?? row.keyword ?? row.sellerId ?? 'item') + ' | ' + String(row.metricSummary ?? '') + ' | ' + ((row.alertReasons ?? []).join('; ') || 'Healthy') + ' |');\nconst reportMarkdown = [\n  '# ' + String(rows[0].reportTitle ?? 'Pangolinfo monitoring report'),\n  '',\n  'Checked: ' + new Date().toISOString(),\n  'Items checked: ' + rows.length,\n  'Items requiring attention: ' + issues.length,\n  '',\n  '| Item | Current metrics | Status |',\n  '| --- | --- | --- |',\n  ...lines,\n  '',\n  'Product: ' + String(rows[0].productUrl ?? 'https://www.pangolinfo.com/')\n].join('\\n');\nreturn [{ json: {\n  checkedAt: new Date().toISOString(), alertRequired: issues.length > 0,\n  itemCount: rows.length, issueCount: issues.length, issues, rows, reportMarkdown,\n  alertFromEmail: rows[0].alertFromEmail, alertToEmail: rows[0].alertToEmail\n} }];"
+      },
+      "id": "7a39fd33-8e9e-4446-a2e7-9e7dec004e7a",
+      "name": "Build Monitoring Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1060,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5e0932ec-59e4-4972-a3b2-f8fbb73a0b94",
+              "leftValue": "={{ $json.alertRequired }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f2e92b23-21c0-4744-aee0-185347df92b2",
+      "name": "Attention Required?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1340,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $json.alertFromEmail }}",
+        "toEmail": "={{ $json.alertToEmail }}",
+        "subject": "=[Best Seller Rank] {{ $json.issueCount }} monitored items need attention",
+        "emailFormat": "text",
+        "text": "={{ $json.reportMarkdown }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "6587e1a0-d5a4-4eb0-a976-8d722994dfa3",
+      "name": "Email Monitoring Alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1640,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e4a81146-a7de-4b6d-a454-22d03b22898e",
+              "name": "status",
+              "value": "healthy",
+              "type": "string"
+            },
+            {
+              "id": "c7b6a4ce-6e0f-4147-a9a9-0c798d134833",
+              "name": "message",
+              "value": "=All {{ $json.itemCount }} monitored items passed the configured thresholds.",
+              "type": "string"
+            },
+            {
+              "id": "2d1b0cb1-31dc-4d25-a6f9-3594d84771bb",
+              "name": "reportMarkdown",
+              "value": "={{ $json.reportMarkdown }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "09ce4a66-fd4a-4e4a-a13d-537a0684f72c",
+      "name": "Healthy Run Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1640,
+        120
+      ]
+    }
+  ],
+  "connections": {
+    "Test Workflow Manually": {
+      "main": [
+        [
+          {
+            "node": "Monitoring Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every Day at 08:00": {
+      "main": [
+        [
+          {
+            "node": "Monitoring Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Monitoring Configuration": {
+      "main": [
+        [
+          {
+            "node": "Prepare Monitoring Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Monitoring Jobs": {
+      "main": [
+        [
+          {
+            "node": "Get Amazon Best Sellers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Amazon Best Sellers": {
+      "main": [
+        [
+          {
+            "node": "Analyze Current Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Current Data": {
+      "main": [
+        [
+          {
+            "node": "Build Monitoring Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Monitoring Report": {
+      "main": [
+        [
+          {
+            "node": "Attention Required?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attention Required?": {
+      "main": [
+        [
+          {
+            "node": "Email Monitoring Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Healthy Run Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "31718df6-f6be-4735-a3fe-4a2b8e2a6f2b",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}
